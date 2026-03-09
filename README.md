@@ -20,7 +20,7 @@
 
 ## Project Overview
 
-In this project our group has designed **real-time analytics pipeline** for a synthetic food-delivery platform that is modelled after the famous ordering systems like Uber Eats, Glovo, and Deliveroo.
+In this project, our group has designed a **real-time analytics pipeline** for a synthetic food-delivery platform modelled after popular ordering systems such as Uber Eats, Glovo, and Deliveroo.
 
 We have implemented this platform as a **three-sided marketplace**:
 
@@ -32,7 +32,7 @@ Customer ──places order──▶ Platform ──dispatches──▶ Courier 
                       (accepts & prepares)
 ```
 
-Every interaction produces **streaming events**. This repository implements:
+Every interaction produces **streaming events**. Our repository implements:
 
 - **Two streaming data feeds** covering the order lifecycle and courier fleet
 - **AVRO schemas** with full type safety and schema versioning support
@@ -45,12 +45,12 @@ Every interaction produces **streaming events**. This repository implements:
 
 | Name | Role |
 |------|------|
-| TBD | Feed Architect — schema design, AVRO versioning |
-| TBD | Generator Engineer — Python generator, edge-case injection |
-| TBD | Data Quality Lead — watermark testing, anomaly labelling |
-| TBD | Pipeline Engineer — Spark Structured Streaming (M2+) |
-| TBD | Pipeline Engineer — Spark Structured Streaming (M2+) |
-| TBD | Dashboard Engineer — visualisation layer (M4) |
+| TBD | Feed Architect — schema design, AVRO versioning | Andrea Saxod
+| TBD | Generator Engineer — Python generator, edge-case injection | Matias Arevalo
+| TBD | Data Quality Lead — watermark testing, anomaly labelling | Cloe Chapotot
+| TBD | Pipeline Engineer — Spark Structured Streaming (M2+) | Joao Paulo Tobar Prado
+| TBD | Pipeline Engineer — Spark Structured Streaming (M2+) |Vittorio Fialdini
+| TBD | Dashboard Engineer — visualisation layer (M4) | Clementine, Francesca Mathieu
 
 ---
 
@@ -84,14 +84,14 @@ food-delivery-streaming/
 
 ## Feed Design
 
-### Why These Two Feeds?
+### Why have we done Two Feeds?
 
-A food delivery platform's core operational challenge comes down to two questions:
+When incorporating a food delivery platform, the core operational challenge comes down to two questions:
 
 > **"What is happening to each order right now?"**  
 > **"Where is each courier and are they available?"**
 
-These questions are answered by fundamentally different data sources with different schemas, cardinalities, and emission frequencies:
+These questions are answered by different data sources with different schemas, cardinalities, and emission frequencies:
 
 | Dimension | Feed 1: Order Lifecycle | Feed 2: Courier Status |
 |-----------|------------------------|----------------------|
@@ -101,7 +101,7 @@ These questions are answered by fundamentally different data sources with differ
 | **Join surface** | `restaurant_id`, `courier_id`, `zone_id` | `order_id`, `zone_id` |
 | **Primary analytics** | Fulfilment rates, cancellation, ETA accuracy | Courier utilisation, delivery speed, anomaly detection |
 
-Together they enable **stream-stream joins** (e.g. enrich an order event with the courier's live position at pickup time) and **supply-demand analysis** (open orders vs. idle couriers per zone per minute).
+Together they enable **stream-stream joins** and **supply-demand analysis**.
 
 ---
 
@@ -206,7 +206,7 @@ Both schemas are defined in [Apache AVRO](https://avro.apache.org/) format (`.av
 
 **`timestamp-millis` logical type** — Both `event_timestamp` and `ingestion_timestamp` are stored as `long` with the `timestamp-millis` logical type annotation, making them directly compatible with Spark's `timestamp` type and Flink's watermark APIs.
 
-**`metadata` map field** — An extensible `map<string>` field on both schemas absorbs future key-value pairs (e.g. app version, A/B test IDs) without requiring a schema migration.
+**`metadata` map field** — An extensible `map<string>` field on both schemas absorbs future key-value pairs without requiring a schema migration.
 
 ---
 
@@ -298,8 +298,6 @@ c = collections.Counter(json.loads(l).get('anomaly_flag') for l in sys.stdin)
 "
 ```
 
----
-
 ## Planned Analytics (Milestones 2–4)
 
 | Milestone | Technology | Key Deliverable |
@@ -307,43 +305,3 @@ c = collections.Counter(json.loads(l).get('anomaly_flag') for l in sys.stdin)
 | **M2** | Kafka / Redpanda | Publish both feeds to topics; partition by `zone_id` |
 | **M3** | Spark Structured Streaming | Windowed aggregations, watermarks, stream-stream joins, anomaly detection |
 | **M4** | Grafana / Streamlit | Live dashboard: order volume, ETA accuracy, courier utilisation, weather impact |
-
-**Example streaming queries planned for M3:**
-
-```sql
--- 5-minute tumbling window: order volume per zone
-SELECT zone_id,
-       window(event_timestamp, '5 minutes') AS w,
-       COUNT(*) AS orders_placed
-FROM order_stream
-WHERE order_status = 'PLACED'
-GROUP BY zone_id, w;
-
--- Peak hour vs off-peak average prep time
-SELECT is_peak_hour,
-       AVG(actual_prep_time_seconds) AS avg_prep_seconds,
-       COUNT(*) AS orders
-FROM order_stream
-WHERE order_status = 'READY_FOR_PICKUP'
-  AND actual_prep_time_seconds IS NOT NULL
-GROUP BY is_peak_hour;
-
--- Weather impact on delivery time
-SELECT weather_condition,
-       AVG(actual_delivery_time_seconds) / 60.0 AS avg_delivery_minutes,
-       COUNT(*) AS deliveries
-FROM order_stream
-WHERE order_status = 'DELIVERED'
-GROUP BY weather_condition;
-
--- Courier utilisation per zone (sliding window)
-SELECT zone_id,
-       COUNT(DISTINCT courier_id) AS active_couriers,
-       SUM(CASE WHEN courier_status = 'ONLINE_IDLE' THEN 1 ELSE 0 END) AS idle_couriers
-FROM courier_stream
-GROUP BY zone_id, window(event_timestamp, '10 minutes', '1 minute');
-```
-
----
-
-*Python 3.8+ — no external dependencies required. Schema version: 1.1.0*
