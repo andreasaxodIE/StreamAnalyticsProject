@@ -38,12 +38,9 @@ def build_restaurants(n: int) -> List[Dict]:
 
 
 def build_customers(n: int) -> List[Dict]:
-    platforms = ["IOS", "ANDROID", "WEB", "API"]
-    platform_weights = [0.45, 0.40, 0.12, 0.03]
     return [
         {
             "customer_id": f"cust_{i:05d}",
-            "platform": weighted_choice(platforms, platform_weights),
             "zone_id": zone_weighted_choice(),
         }
         for i in range(n)
@@ -166,7 +163,6 @@ class OrderEventGenerator:
             "customer_rating": None,
             "is_duplicate": is_duplicate,
             "is_late_arrival": is_late,
-            "platform": customer["platform"],
             "metadata": None,
         }
 
