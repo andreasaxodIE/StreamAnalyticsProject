@@ -1,6 +1,4 @@
 """
-courier_generator.py
-
 This file generates synthetic CourierStatusEvent data streams.
 The goal is to simulate how couriers move through a shift, how their status changes over time,
 and how some realistic irregular cases can also appear in the data.
