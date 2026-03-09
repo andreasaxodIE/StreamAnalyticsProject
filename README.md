@@ -295,10 +295,10 @@ c = collections.Counter(json.loads(l).get('anomaly_flag') for l in sys.stdin)
 "
 ```
 
-## Planned Analytics (Milestones 2–4)
+## Planned Analytics (Milestones 2)
 
 | Milestone | Technology | Key Deliverable |
 |-----------|-----------|-----------------|
 | **M2** | Kafka / Redpanda | Publish both feeds to topics; partition by `zone_id` |
-| **M3** | Spark Structured Streaming | Windowed aggregations, watermarks, stream-stream joins, anomaly detection |
-| **M4** | Grafana / Streamlit | Live dashboard: order volume, ETA accuracy, courier utilisation, weather impact |
+| **M2** | Spark Structured Streaming | Windowed aggregations, watermarks, stream-stream joins, anomaly detection |
+| **M2** | Grafana / Streamlit | Live dashboard: order volume, ETA accuracy, courier utilisation, weather impact |
