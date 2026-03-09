@@ -45,12 +45,12 @@ Every interaction produces **streaming events**. Our repository implements:
 
 | Name | Role |
 |------|------|
-| TBD | Feed Architect — schema design, AVRO versioning | Andrea Saxod
-| TBD | Generator Engineer — Python generator, edge-case injection | Matias Arevalo
-| TBD | Data Quality Lead — watermark testing, anomaly labelling | Cloe Chapotot
-| TBD | Pipeline Engineer — Spark Structured Streaming (M2+) | Joao Paulo Tobar Prado
-| TBD | Pipeline Engineer — Spark Structured Streaming (M2+) |Vittorio Fialdini
-| TBD | Dashboard Engineer — visualisation layer (M4) | Clementine, Francesca Mathieu
+| Andrea Saxod | Feed Architect — schema design, AVRO versioning | 
+| Matias Arevalo | Generator Engineer — Python generator, edge-case injection | 
+| Cloe Chapotot | Data Quality Lead — watermark testing, anomaly labelling | 
+| Joao Paulo Tobar Prado | Pipeline Engineer — Spark Structured Streaming (M2+) | 
+| Vittorio Fialdini | Pipeline Engineer — Spark Structured Streaming (M2+) |
+| Clementine, Francesca Mathieu | Dashboard Engineer — visualisation layer (M4) | 
 
 ---
 
