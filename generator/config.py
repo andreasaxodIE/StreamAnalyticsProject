@@ -36,26 +36,26 @@ ZONES: Dict[str, Dict] = {
         "courier_density": 2.0,
         "label": "Midtown",
     },
-    "zone_uptown": {
-        "lat_range": (40.7550, 40.7900),
-        "lon_range": (-73.9900, -73.9500),
-        "demand_weight": 1.5,
-        "courier_density": 1.2,
-        "label": "Uptown",
+    "zone_west": {
+        "lat_range": (40.6500, 40.7000),
+        "lon_range": (-74.0100, -73.9600),
+        "demand_weight": 2.0,
+        "courier_density": 1.8,
+        "label": "West Side",
     },
-    "zone_east_side": {
+    "zone_east": {
         "lat_range": (40.7100, 40.7450),
         "lon_range": (-73.9700, -73.9400),
         "demand_weight": 1.8,
         "courier_density": 1.5,
         "label": "East Side",
     },
-    "zone_brooklyn": {
-        "lat_range": (40.6500, 40.7000),
-        "lon_range": (-74.0100, -73.9300),
-        "demand_weight": 2.0,
-        "courier_density": 1.8,
-        "label": "Brooklyn",
+    "zone_uptown": {
+        "lat_range": (40.7550, 40.7900),
+        "lon_range": (-73.9900, -73.9500),
+        "demand_weight": 1.5,
+        "courier_density": 1.2,
+        "label": "Uptown",
     },
     "zone_suburbs": {
         "lat_range": (40.6000, 40.6500),
