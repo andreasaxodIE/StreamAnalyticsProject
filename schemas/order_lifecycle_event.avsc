@@ -193,15 +193,6 @@
       "doc": "Flag set by generator when event_timestamp is significantly behind ingestion_timestamp, simulating late data."
     },
     {
-      "name": "platform",
-      "type": {
-        "type": "enum",
-        "name": "Platform",
-        "symbols": ["IOS", "ANDROID", "WEB", "API"]
-      },
-      "doc": "Channel through which the order was placed."
-    },
-    {
       "name": "metadata",
       "type": ["null", {
         "type": "map",
