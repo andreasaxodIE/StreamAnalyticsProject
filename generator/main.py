@@ -77,6 +77,8 @@ def parse_args():
         description="Food-delivery streaming event generator (Milestone 1)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+
+    # Scale settings
     p.add_argument("--orders",       type=int,   default=100,  help="Number of orders to simulate")
     p.add_argument("--couriers",     type=int,   default=80,   help="Number of couriers in the fleet")
     p.add_argument("--restaurants",  type=int,   default=50,   help="Number of restaurants")
@@ -99,14 +101,12 @@ def parse_args():
     return p.parse_args()
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
 def main():
+    # Parse CLI args first so the run is configurable
     args = parse_args()
 
-    # Build config
+    # Build a config object that all generators use.
+    # Keeps the parameters centralized and easy to pass around.
     cfg = GeneratorConfig(
         num_restaurants=args.restaurants,
         num_couriers=args.couriers,
@@ -145,7 +145,7 @@ def main():
     order_schema   = _load_schema("order_lifecycle_event.avsc")
     courier_schema = _load_schema("courier_status_event.avsc")
 
-    # ── Feed 1: Order Lifecycle Events ──────────────────────────────────────
+    # Feed 1: Order Lifecycle Events
     print("Generating Feed 1: Order Lifecycle Events ...")
     order_gen = OrderEventGenerator(cfg)
     order_events = list(order_gen.stream(start_ts_ms, n_orders=args.orders))
@@ -155,7 +155,7 @@ def main():
     write_json_lines(order_events, os.path.join(out_dir, "order_lifecycle_events.jsonl"))
     write_avro(order_events, order_schema, os.path.join(out_dir, "order_lifecycle_events.avro"))
 
-    # ── Feed 2: Courier Status Events ───────────────────────────────────────
+    # Feed 2: Courier Status Events
     print("\nGenerating Feed 2: Courier Status Events ...")
     courier_gen = CourierFleetGenerator(cfg)
     courier_events = list(courier_gen.stream(start_ts_ms))
@@ -164,7 +164,7 @@ def main():
     write_json_lines(courier_events, os.path.join(out_dir, "courier_status_events.jsonl"))
     write_avro(courier_events, courier_schema, os.path.join(out_dir, "courier_status_events.avro"))
 
-    # ── Summary statistics ───────────────────────────────────────────────────
+    # Summary statistics
     print(f"\n{'='*60}")
     print("  Summary Statistics")
     print(f"{'='*60}")
