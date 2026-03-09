@@ -1,22 +1,21 @@
-# Generator — Usage Guide
+# How to Use the Generator
 
-This directory contains the Python event generator for the food-delivery streaming pipeline. It produces two synthetic data feeds in both JSON Lines and AVRO binary format, with no external dependencies required.
+This directory contains the Python generator to simulate the food-delivery streaming pipeline. It creates two synthetic event sreams, one for orders and one for couriers, and saves them in JSON Lines and AVRO formats. It runs using only Python’s standard library, so no additional packages need to be installed.
 
----
 
 ## Files
 
 | File | Description |
 |------|-------------|
-| `main.py` | CLI entry point — run this to generate data |
-| `config.py` | All tuneable parameters, zone definitions, menu data, weather and peak-hour logic |
-| `order_generator.py` | `OrderEventGenerator` — produces Feed 1 (order lifecycle events) |
-| `courier_generator.py` | `CourierFleetGenerator` + `CourierSimulator` — produces Feed 2 (courier status events) |
-| `avro_writer.py` | Pure-stdlib AVRO OCF binary writer (no third-party dependencies) |
+| `main.py` | Command-line entry point - run this to generate data |
+| `config.py` | Contains all the configurable parameters such as zones, weather, demand curves, and simulation logic |
+| `order_generator.py` | `OrderEventGenerator` - Generates Feed 1 (order lifecycle events) |
+| `courier_generator.py` | `CourierFleetGenerator` + `CourierSimulator` - Generates Feed 2 (courier movement and status events) |
+| `avro_writer.py` | Lightweight AVRO Object Container File writer (standard library) |
 
 ---
 
-## How to Run
+## How to Run the Generator
 
 ### Requirements
 - Python 3.8+
@@ -25,57 +24,56 @@ This directory contains the Python event generator for the food-delivery streami
 ### Basic usage
 
 ```bash
-# From the repo root:
+# From the main project folder:
 python generator/main.py
 ```
 
-This generates 100 orders and 80 couriers over a 1-hour simulation window and writes 4 files to `./sample_data/`.
+This runs a 1-hour simulation with 100 orders and 80 couriers. It then saves the 4 output files (JSONL and AVRO versions of each feed) to `./sample_data/`.
 
----
 
-## CLI Reference
+## Avaliable Paramters
+
+You can modify the simulation using command-line options:
 
 ```
 python generator/main.py [options]
 
-Scale:
-  --orders N            Number of orders to simulate           (default: 100)
-  --couriers N          Courier fleet size                      (default: 80)
-  --restaurants N       Restaurant pool size                    (default: 50)
-  --customers N         Customer pool size                      (default: 500)
-  --duration SECONDS    Simulation time window in seconds       (default: 3600)
-  --seed N              Random seed for reproducibility         (default: 42)
-  --output-dir PATH     Where to write output files             (default: ./sample_data)
+Size of simulation:
+  --orders N: Number of orders to simulate (default: 100)
+  --couriers N: Courier fleet size (default: 80)
+  --restaurants N: Restaurant pool size (default: 50)
+  --customers N: Customer pool size(default: 500)
+  --duration SECONDS:Simulation time window in seconds (default: 3600)
+  --seed N:Random seed for reproducibility (default: 42)
+  --output-dir PATH: Where to write output files (default: ./sample_data)
 
-Edge case rates:
-  --late-rate FLOAT     Fraction of events with late arrival    (default: 0.05)
-  --duplicate-rate FLOAT  Fraction of events duplicated        (default: 0.02)
-  --cancel-rate FLOAT   Order cancellation probability          (default: 0.12)
-  --anomaly-rate FLOAT  Fraction with impossible durations      (default: 0.02)
+Edge case rates (adding realistic streaming problems):
+  --late-rate FLOAT: Fraction of events with late arrival (default: 0.05)
+  --duplicate-rate FLOAT: Fraction of events duplicated (default: 0.02)
+  --cancel-rate FLOAT: Order cancellation probability (default: 0.12)
+  --anomaly-rate FLOAT: Fraction with impossible durations (default: 0.02)
 
 Demand surge:
-  --surge               Enable zone-level demand surge
-  --surge-zone ZONE_ID  Zone to surge                           (default: zone_downtown)
-  --surge-multiplier N  Demand multiplier during surge          (default: 3.0)
+  --surge: Enable zone-level demand surge
+  --surge-zone ZONE_ID: Zone to surge (default: zone_downtown)
+  --surge-multiplier N: Demand multiplier during surge (default: 3.0)
 ```
 
 ### Examples
 
 ```bash
-# Larger dataset for pipeline testing
+# Generate a Larger dataset
 python generator/main.py --orders 1000 --couriers 200 --restaurants 80 --duration 7200
 
-# Stress-test deduplication and late-data logic
+# Generate data with late and duplicate events
 python generator/main.py --orders 500 --late-rate 0.20 --duplicate-rate 0.10
 
-# Simulate a downtown demand surge (e.g. a concert ending)
+# Simulate a increase in demand downtown (for example at the end of astadium game)
 python generator/main.py --orders 300 --surge --surge-zone zone_downtown --surge-multiplier 4.0
 
 # Reproducible run with fixed seed
 python generator/main.py --seed 12345 --orders 250
 ```
-
----
 
 ## Architecture
 
@@ -109,16 +107,19 @@ main.py
 
 ## Realism Model
 
+The generator has several realistic modelling assumptions:
+
 ### Geographic Zones
 
-Orders and couriers are distributed across 6 zones with weighted probabilities, producing the downtown-heavy skew typical of real delivery platforms:
+Orders and couriers are distributed across 6 zones with weighted probabilities, meaning downtown receives the highest share of orders, like in real food delivery apps:
+
 
 | Zone ID | Label | Demand Weight | Courier Density |
 |---------|-------|:---:|:---:|
 | `zone_downtown` | Downtown | 3.5 | 3.0 |
 | `zone_midtown` | Midtown | 2.5 | 2.0 |
-| `zone_brooklyn` | Brooklyn | 2.0 | 1.8 |
-| `zone_east_side` | East Side | 1.8 | 1.5 |
+| `zone_west` | West Side | 2.0 | 1.8 |
+| `zone_east` | East Side | 1.8 | 1.5 |
 | `zone_uptown` | Uptown | 1.5 | 1.2 |
 | `zone_suburbs` | Suburbs | 0.8 | 0.5 |
 
@@ -135,13 +136,13 @@ The generator uses an hourly demand curve so that order volume peaks at lunch an
 | Dinner peak | 19–21 | **Highest** (`is_peak_hour = true`) |
 | Late night | 22–23 | Low |
 
-During peak hours, `estimated_prep_time_seconds` is inflated by **×1.4** to model restaurants handling higher order volumes simultaneously.
+During peak hours, preperation time (`estimated_prep_time_seconds`) is increased by **×1.4** to reflect restaurants handling higher order volumes simultaneously.
 
-Weekend orders receive an additional **×1.25** multiplier over weekday volumes.
+Weekend demand is slightly higher (**×1.25**) compared to weekdays.
 
 ### Weather
 
-Each simulation run samples a city-wide weather state that persists for the full window:
+At the start of each run, one weather condition is chosen and applied for the entire simulation:
 
 | Condition | Probability | Delivery time multiplier |
 |-----------|:-----------:|:------------------------:|
@@ -150,11 +151,11 @@ Each simulation run samples a city-wide weather state that persists for the full
 | `HEAVY_RAIN` | 10% | ×1.45 |
 | `SNOW` | 5% | ×1.60 |
 
-The multiplier is applied to `estimated_delivery_time_seconds` on the PLACED event.
+The multiplier is applied to `estimated_delivery_time_seconds` at the moment the order is placed.
 
 ### Courier Movement
 
-Courier GPS positions move realistically towards their target using great-circle geometry (haversine formula), at speeds appropriate to the courier's vehicle type:
+Courier GPS positions move realistically towards their target using the Haversine formula, at speeds depending on the courier's vehicle:
 
 | Vehicle | Speed range (km/h) |
 |---------|--------------------|
@@ -187,10 +188,10 @@ Running `python generator/main.py` produces:
 
 ```
 sample_data/
-├── order_lifecycle_events.jsonl   # Feed 1 — one JSON object per line
-├── order_lifecycle_events.avro    # Feed 1 — AVRO Object Container File
-├── courier_status_events.jsonl    # Feed 2 — one JSON object per line
-└── courier_status_events.avro     # Feed 2 — AVRO Object Container File
+├── order_lifecycle_events.jsonl   # Feed 1 - one JSON object per line
+├── order_lifecycle_events.avro    # Feed 1 - AVRO Object Container File
+├── courier_status_events.jsonl    # Feed 2 - one JSON object per line
+└── courier_status_events.avro     # Feed 2 - AVRO Object Container File
 ```
 
 ### Quick inspection commands
@@ -229,7 +230,7 @@ c = collections.Counter(json.loads(l).get('anomaly_flag') for l in sys.stdin)
 
 1. Add the field to the AVRO schema in `../schemas/` with a `"default"` value for backward compatibility
 2. Populate the field in the relevant `_make_event()` method in the generator
-3. Bump `schema_version` to the next minor version (e.g. `"1.2.0"`)
+3. Update the schema version
 
 ### Add a new geographic zone
 
@@ -253,3 +254,4 @@ In `config.py`, edit the `is_peak_hour()` function:
 def is_peak_hour(hour: int) -> bool:
     return hour in (12, 13, 14, 19, 20, 21)  # adjust hours here
 ```
+
