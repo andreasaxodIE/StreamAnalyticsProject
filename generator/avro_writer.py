@@ -1,13 +1,3 @@
-"""
-avro_writer.py — Pure-stdlib AVRO OCF (Object Container File) writer.
-
-Implements the minimum AVRO binary encoding needed to produce valid .avro files
-without any third-party dependencies. Supports: null, boolean, int, long, float,
-double, string, bytes, enum, array, map, union, and record types.
-
-Reference: https://avro.apache.org/docs/current/spec.html
-"""
-
 from __future__ import annotations
 import io
 import json
@@ -17,10 +7,6 @@ import os
 import uuid
 from typing import Any, Dict, List
 
-
-# ---------------------------------------------------------------------------
-# Low-level AVRO primitive encoders
-# ---------------------------------------------------------------------------
 
 def encode_null(_value: None) -> bytes:
     return b""
@@ -32,7 +18,6 @@ def encode_boolean(value: bool) -> bytes:
 
 def _encode_long_raw(n: int) -> bytes:
     """Encode a Python int as AVRO zigzag-encoded varint (long)."""
-    # Zigzag encode
     n = (n << 1) ^ (n >> 63)
     buf = []
     while True:
@@ -83,7 +68,7 @@ def encode_array(value: List, item_schema: Any, schema_registry: Dict) -> bytes:
     buf = encode_long(len(value))
     for item in value:
         buf += encode_value(item, item_schema, schema_registry)
-    buf += encode_long(0)  # block terminator
+    buf += encode_long(0)  
     return buf
 
 
@@ -100,15 +85,12 @@ def encode_map(value: Dict, value_schema: Any, schema_registry: Dict) -> bytes:
 
 def encode_union(value: Any, union_schemas: List, schema_registry: Dict) -> bytes:
     """Encode a union value. Selects branch by Python type or explicit dict."""
-    # If value is None → null branch
     if value is None:
-        # find null index
         for i, s in enumerate(union_schemas):
             if s == "null" or (isinstance(s, dict) and s.get("type") == "null"):
                 return encode_long(i)
         raise ValueError("None value but no null branch in union")
 
-    # Otherwise try each non-null branch
     for i, s in enumerate(union_schemas):
         if s == "null" or (isinstance(s, dict) and s.get("type") == "null"):
             continue
@@ -120,18 +102,12 @@ def encode_union(value: Any, union_schemas: List, schema_registry: Dict) -> byte
     raise ValueError(f"Cannot encode union value: {value!r} with schemas {union_schemas}")
 
 
-# ---------------------------------------------------------------------------
-# Central dispatcher
-# ---------------------------------------------------------------------------
 
 def encode_value(value: Any, schema: Any, schema_registry: Dict) -> bytes:
     """Recursively encode a Python value according to an AVRO schema."""
-
-    # Resolve named type references
     if isinstance(schema, str):
         if schema in schema_registry:
             return encode_value(value, schema_registry[schema], schema_registry)
-        # Primitives
         if schema == "null":    return encode_null(value)
         if schema == "boolean": return encode_boolean(value)
         if schema == "int":     return encode_int(value)
@@ -157,7 +133,6 @@ def encode_value(value: Any, schema: Any, schema_registry: Dict) -> bytes:
         if t == "map":
             return encode_map(value, schema["values"], schema_registry)
 
-        # Logical types — encode as underlying type
         if t in ("null", "boolean", "int", "long", "float", "double", "bytes", "string"):
             return encode_value(value, t, schema_registry)
 
@@ -174,9 +149,6 @@ def encode_record(record: Dict, schema: Dict, schema_registry: Dict) -> bytes:
     return buf
 
 
-# ---------------------------------------------------------------------------
-# Schema registry builder (resolves named types)
-# ---------------------------------------------------------------------------
 
 def build_schema_registry(schema: Dict, registry: Dict = None) -> Dict:
     """Walk schema tree and register all named types by their full name."""
@@ -189,7 +161,7 @@ def build_schema_registry(schema: Dict, registry: Dict = None) -> Dict:
             name = schema.get("name", "")
             full_name = f"{ns}.{name}" if ns else name
             registry[full_name] = schema
-            registry[name] = schema  # also register short name
+            registry[name] = schema 
         for v in schema.values():
             build_schema_registry(v, registry)
     elif isinstance(schema, list):
@@ -198,9 +170,6 @@ def build_schema_registry(schema: Dict, registry: Dict = None) -> Dict:
     return registry
 
 
-# ---------------------------------------------------------------------------
-# AVRO Object Container File (OCF) writer
-# ---------------------------------------------------------------------------
 
 AVRO_MAGIC = b"Obj\x01"
 AVRO_SYNC_MARKER_SIZE = 16
@@ -232,12 +201,11 @@ class AvroWriter:
             "avro.codec": self.codec.encode("utf-8"),
         }
         header = AVRO_MAGIC
-        # Meta map
         header += encode_long(len(meta))
         for k, v in meta.items():
             header += encode_string(k)
             header += encode_bytes(v)
-        header += encode_long(0)  # end of map
+        header += encode_long(0)  
         header += self.sync_marker
         self._f.write(header)
 
