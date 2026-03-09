@@ -133,7 +133,6 @@ PLACED → ACCEPTED → PREPARING → READY_FOR_PICKUP → PICKED_UP → EN_ROUT
 | `actual_delivery_time_seconds` | int (nullable) | Populated on DELIVERED for end-to-end latency analytics |
 | `is_late_arrival` | boolean | Pre-labelled late data for watermark validation |
 | `is_duplicate` | boolean | Pre-labelled duplicates for idempotency testing |
-| `platform` | enum | IOS / ANDROID / WEB / API — order channel |
 
 **Analytics enabled:**
 
@@ -142,7 +141,6 @@ PLACED → ACCEPTED → PREPARING → READY_FOR_PICKUP → PICKED_UP → EN_ROUT
 - **ETA accuracy** — compare `estimated_delivery_time_seconds` vs `actual_delivery_time_seconds`
 - **Peak-hour prep time SLA breaches** — flag orders where `actual_prep_time_seconds` exceeds threshold, segmented by `is_peak_hour`
 - **Weather impact on delivery times** — aggregate `actual_delivery_time_seconds` grouped by `weather_condition`
-- **Order volume by platform** — count PLACED events grouped by `platform` in sliding windows
 
 ---
 
