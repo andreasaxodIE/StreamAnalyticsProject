@@ -20,7 +20,7 @@
 
 ## Project Overview
 
-In this project, our group has designed a **real-time analytics pipeline** for a synthetic food-delivery platform modelled after popular ordering systems such as Uber Eats, Glovo, and Deliveroo.
+In this project, our group has designed a **real-time analytics pipeline** for a food-delivery platform inspired popular ordering systems such as Uber Eats, Glovo, and Deliveroo.
 
 We have implemented this platform as a **three-sided marketplace**:
 
@@ -84,10 +84,9 @@ food-delivery-streaming/
 
 ## Feed Design
 
-### Why have we done Two Feeds?
+### Two Feeds
 
 When incorporating a food delivery platform, the core operational challenge comes down to two questions:
-
 > **"What is happening to each order right now?"**  
 > **"Where is each courier and are they available?"**
 
