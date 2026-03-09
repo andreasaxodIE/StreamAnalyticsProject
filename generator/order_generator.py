@@ -1,5 +1,5 @@
 """
-order_generator.py — Generates synthetic OrderLifecycleEvent streams.
+order_generator.py — Creates OrderLifecycleEvent streams.
 """
 
 from __future__ import annotations
@@ -16,9 +16,8 @@ from config import (
 )
 
 
-# ---------------------------------------------------------------------------
-# Reference entities
-# ---------------------------------------------------------------------------
+
+# Reference entities ---------------------------------------------------------------------------
 
 def build_restaurants(n: int) -> List[Dict]:
     restaurants = []
@@ -47,9 +46,9 @@ def build_customers(n: int) -> List[Dict]:
     ]
 
 
-# ---------------------------------------------------------------------------
-# Order lifecycle builder
-# ---------------------------------------------------------------------------
+
+# Order lifecycle builder ---------------------------------------------------------------------------
+# Orders normally transition through these states sequentially, this sequence may later be truncated (cancellation)or modified (missing steps or anomalies).
 
 FULL_LIFECYCLE = [
     "PLACED",
@@ -94,7 +93,7 @@ def _sample_order_items(cuisine: str) -> Tuple[List[Dict], int]:
 
 def _inter_event_delay(from_status: str, to_status: str, anomalous: bool,
                        peak: bool, weather: str) -> int:
-    """Returns seconds between two consecutive lifecycle events."""
+    """ Computes the time difference between two lifecycle states"""
     delays = {
         ("PLACED",           "ACCEPTED"):         (30,  120),
         ("ACCEPTED",         "PREPARING"):        (10,  60),
@@ -274,7 +273,6 @@ class OrderEventGenerator:
                 events.append(oo_event)
                 break
 
-        # Rating on successful delivery
         if lifecycle[-1] == "DELIVERED" and random.random() < 0.65:
             rating_event = copy.deepcopy(events[-1])
             rating_event["event_id"] = str(uuid.uuid4())
@@ -283,7 +281,6 @@ class OrderEventGenerator:
             rating_event["is_late_arrival"] = True
             events.append(rating_event)
 
-        # Inject duplicates
         duplicated = []
         for ev in events:
             duplicated.append(ev)
