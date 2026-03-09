@@ -1,4 +1,4 @@
-# 🛵 Real-Time Food Delivery Analytics Pipeline
+# Real-Time Food Delivery Analytics Pipeline
 
 > **Milestone 1 — Streaming Data Feed Design & Generation**  
 > Course: Big Data & Streaming Systems
@@ -20,9 +20,9 @@
 
 ## Project Overview
 
-This project designs and implements a **real-time analytics pipeline** for a synthetic food-delivery platform modelled after systems like Uber Eats, Glovo, and Deliveroo.
+In this project our group has designed **real-time analytics pipeline** for a synthetic food-delivery platform that is modelled after the famous ordering systems like Uber Eats, Glovo, and Deliveroo.
 
-The platform is a **three-sided marketplace**:
+We have implemented this platform as a **three-sided marketplace**:
 
 ```
 Customer ──places order──▶ Platform ──dispatches──▶ Courier ──delivers──▶ Customer
