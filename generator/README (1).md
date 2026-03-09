@@ -103,9 +103,9 @@ main.py
   └── writes JSON Lines + AVRO OCF for each feed
 ```
 
----
 
-## Realism Model
+
+## Realistic Model
 
 The generator has several realistic modelling assumptions:
 
@@ -165,7 +165,6 @@ Courier GPS positions move realistically towards their target using the Haversin
 | Car | 10 – 90 |
 | Foot | 3 – 8 |
 
----
 
 ## Edge Cases Injected
 
@@ -180,7 +179,6 @@ Courier GPS positions move realistically towards their target using the Haversin
 | Impossible courier speed | `anomaly_flag = IMPOSSIBLE_SPEED` | `--anomaly-rate` |
 | Out-of-order rating events | `is_late_arrival = true` | automatic on DELIVERED |
 
----
 
 ## Output Files
 
@@ -221,8 +219,6 @@ c = collections.Counter(json.loads(l).get('anomaly_flag') for l in sys.stdin)
 [print(f'{str(s):<30} {n}') for s,n in sorted(c.items())]
 "
 ```
-
----
 
 ## Extending the Generator
 
